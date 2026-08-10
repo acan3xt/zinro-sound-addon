@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>zinro.net sound addon</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <h1>zinro.net sound addon</h1>
+
+    <section>
+      <label class="switch-row">
+        <span>タイマー通知</span>
+        <input id="timerEnabled" type="checkbox">
+      </label>
+
+      <label>昼の通知秒数
+        <input id="daySeconds" type="text" inputmode="numeric" placeholder="空欄なら通知なし">
+      </label>
+
+      <label>投票の通知秒数
+        <input id="voteSeconds" type="text" inputmode="numeric" placeholder="50,30,10,9,8">
+      </label>
+
+      <label>夜の通知秒数
+        <input id="nightSeconds" type="text" inputmode="numeric" placeholder="空欄なら通知なし">
+      </label>
+
+      <label>タイマー音量 <output id="timerVolumeValue"></output>
+        <input id="timerVolume" type="range" min="0" max="100" step="1">
+      </label>
+      <button id="testTimer" type="button">タイマー音をテスト</button>
+    </section>
+
+    <section>
+      <label class="switch-row">
+        <span>キーワード通知</span>
+        <input id="keywordEnabled" type="checkbox">
+      </label>
+
+      <label>キーワード（改行・カンマ区切り）
+        <textarea id="keywords" rows="5" placeholder="1行に1キーワード"></textarea>
+      </label>
+
+      <label class="check-row">
+        <input id="caseInsensitive" type="checkbox">
+        <span>英字の大文字・小文字を区別しない</span>
+      </label>
+
+      <label class="check-row">
+        <input id="excludeSelf" type="checkbox">
+        <span>自分の発言を除外</span>
+      </label>
+
+      <label>自分の名前（空欄なら自動検出）
+        <input id="selfName" type="text" placeholder="空欄なら自動検出">
+      </label>
+
+      <label>キーワード音量 <output id="keywordVolumeValue"></output>
+        <input id="keywordVolume" type="range" min="0" max="100" step="1">
+      </label>
+      <button id="testKeyword" type="button">キーワード音をテスト</button>
+    </section>
+
+    <section>
+      <label class="switch-row">
+        <span>スレ保守用時間通知</span>
+        <input id="maintenanceEnabled" type="checkbox">
+      </label>
+
+      <p class="section-note">現実時刻の「分」の末尾が9（:09 / :19 / :29 / :39 / :49 / :59）になったら1回だけ鳴らします。</p>
+
+      <label>スレ保守用通知音量 <output id="maintenanceVolumeValue"></output>
+        <input id="maintenanceVolume" type="range" min="0" max="100" step="1">
+      </label>
+      <button id="testMaintenance" type="button">スレ保守用通知音をテスト</button>
+    </section>
+
+    <p id="status" role="status"></p>
+    <p class="note">設定は自動保存されます。音が鳴らない場合は zinro.net のタブを一度クリックしてからテストしてください。</p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
