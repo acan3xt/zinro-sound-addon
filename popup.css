@@ -1,0 +1,46 @@
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-width: 340px;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+}
+main { padding: 14px; }
+h1 { margin: 0 0 12px; font-size: 18px; }
+section {
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 10px;
+}
+label { display: block; margin: 0 0 10px; }
+input[type="text"], textarea {
+  width: 100%;
+  margin-top: 5px;
+  padding: 7px 8px;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-radius: 6px;
+  background: Canvas;
+  color: CanvasText;
+}
+textarea { resize: vertical; }
+input[type="range"] { width: 100%; margin-top: 6px; }
+.switch-row, .check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.switch-row { justify-content: space-between; font-weight: 700; }
+.check-row { justify-content: flex-start; font-weight: 400; }
+button {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-radius: 7px;
+  cursor: pointer;
+}
+#status { min-height: 1.4em; margin: 4px 0; font-size: 12px; }
+.note { margin: 6px 0 0; opacity: .72; font-size: 11px; line-height: 1.45; }
+
+.section-note { margin: -2px 0 10px; opacity: .78; font-size: 12px; line-height: 1.45; }
