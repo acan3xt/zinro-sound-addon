@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "zinro.net Sound Add-on",
+  "version": "1.0.0",
+  "description": "zinro.net の昼・投票・夜タイマー、スレ保守用時間、指定キーワードを音で通知します。",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://zinro.net/*"
+  ],
+  "action": {
+    "default_title": "zinro.net Sound Add-on",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://zinro.net/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "sounds/*.wav"
+      ],
+      "matches": [
+        "https://zinro.net/*"
+      ]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zinro-sound-notifier@local",
+      "strict_min_version": "109.0"
+    }
+  }
+}
