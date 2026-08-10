@@ -12,15 +12,7 @@
   ],
   "action": {
     "default_title": "zinro.net Sound Add-on",
-    "default_popup": "popup.html",
-    "default_icon": {
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
-  },
-  "icons": {
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "default_popup": "popup.html"
   },
   "content_scripts": [
     {
@@ -31,16 +23,6 @@
         "content.js"
       ],
       "run_at": "document_idle"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "sounds/*.wav"
-      ],
-      "matches": [
-        "https://zinro.net/*"
-      ]
     }
   ],
   "browser_specific_settings": {
