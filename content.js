@@ -68,22 +68,54 @@
     return "";
   }
 
+  let audioContext = null;
+
+  function getAudioContext() {
+    if (!audioContext) {
+      audioContext = new AudioContext();
+    }
+    if (audioContext.state === "suspended") {
+      audioContext.resume().catch(() => {});
+    }
+    return audioContext;
+  }
+
+  function playTone(frequency, start, duration, volume, type = "sine") {
+    const ctx = getAudioContext();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), ctx.currentTime + start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + duration);
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start(ctx.currentTime + start);
+    oscillator.stop(ctx.currentTime + start + duration + 0.02);
+  }
+
   function playSound(kind) {
-    const file = kind === "keyword"
-      ? "sounds/keyword.wav"
-      : kind === "maintenance"
-        ? "sounds/maintenance.wav"
-        : "sounds/timer.wav";
-    const volume = kind === "keyword"
-      ? settings.keywordVolume
-      : kind === "maintenance"
-        ? settings.maintenanceVolume
-        : settings.timerVolume;
-    const audio = new Audio(chrome.runtime.getURL(file));
-    audio.volume = clampVolume(volume);
-    audio.play().catch(err => {
-      console.warn("[zinro notifier] 音声を再生できませんでした", err);
-    });
+    const volume = clampVolume(
+      kind === "keyword"
+        ? settings.keywordVolume
+        : kind === "maintenance"
+          ? settings.maintenanceVolume
+          : settings.timerVolume
+    );
+
+    if (volume <= 0) return;
+
+    if (kind === "keyword") {
+      playTone(880, 0, 0.13, volume, "sine");
+      playTone(1175, 0.14, 0.15, volume, "sine");
+    } else if (kind === "maintenance") {
+      playTone(523, 0, 0.14, volume, "triangle");
+      playTone(659, 0.18, 0.14, volume, "triangle");
+      playTone(784, 0.36, 0.18, volume, "triangle");
+    } else {
+      playTone(1047, 0, 0.16, volume, "square");
+    }
   }
 
   function getTimerState(el) {
