@@ -70,7 +70,17 @@
         <input id="maintenanceEnabled" type="checkbox">
       </label>
 
-      <p class="section-note">現実時刻の「分」の末尾が9（:09 / :19 / :29 / :39 / :49 / :59）になったら1回だけ鳴らします。</p>
+      <p class="section-note">現実時刻の「分」の末尾が9（:09 / :19 / :29 / :39 / :49 / :59）の1分間に、設定した回数だけ等間隔で鳴らします。同じ通知タイミングはリロードしても重複しません。</p>
+
+      <label>1分間の通知回数
+        <select id="maintenanceCount">
+          <option value="1">1回</option>
+          <option value="2">2回</option>
+          <option value="3">3回</option>
+          <option value="4">4回</option>
+          <option value="6">6回</option>
+        </select>
+      </label>
 
       <label>スレ保守用通知音量 <output id="maintenanceVolumeValue"></output>
         <input id="maintenanceVolume" type="range" min="0" max="100" step="1">
