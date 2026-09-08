@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "zinro.net Sound Add-on",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "zinro.net の昼・投票・夜タイマー、スレ保守用時間、指定キーワードを音で通知します。",
   "permissions": [
     "storage",
