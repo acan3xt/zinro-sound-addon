@@ -7,6 +7,7 @@ const DEFAULTS = {
   nightSeconds: "",
   timerVolume: 70,
   maintenanceEnabled: false,
+  maintenanceCount: 1,
   maintenanceVolume: 70,
   keywordEnabled: false,
   keywords: "",
@@ -26,7 +27,7 @@ const maintenanceVolumeValue = document.getElementById("maintenanceVolumeValue")
 function readValue(id) {
   const el = elements[id];
   if (el.type === "checkbox") return el.checked;
-  if (el.type === "range") return Number(el.value);
+  if (el.type === "range" || id === "maintenanceCount") return Number(el.value);
   return el.value;
 }
 
