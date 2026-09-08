@@ -8,6 +8,7 @@
     nightSeconds: "",
     timerVolume: 70,
     maintenanceEnabled: false,
+    maintenanceCount: 1,
     maintenanceVolume: 70,
     keywordEnabled: false,
     keywords: "",
@@ -16,6 +17,8 @@
     selfName: "",
     caseInsensitive: true
   };
+
+  const MAINTENANCE_LAST_KEY = "maintenanceLastNotificationKey";
 
   let settings = { ...DEFAULTS };
   let lastTimerKey = null;
@@ -195,23 +198,43 @@
     if (hit) playSound("keyword");
   }
 
-  function checkMaintenanceTime() {
+  function getMaintenanceTargets() {
+    const requested = Number(settings.maintenanceCount);
+    const count = [1, 2, 3, 4, 6].includes(requested) ? requested : 1;
+    const interval = 60 / count;
+    return Array.from({ length: count }, (_unused, index) => index * interval);
+  }
+
+  async function checkMaintenanceTime() {
     if (!settings.maintenanceEnabled) return;
 
     const now = new Date();
     const minute = now.getMinutes();
     if (minute % 10 !== 9) return;
 
+    const second = now.getSeconds();
+    const targetSecond = getMaintenanceTargets().find(
+      target => second >= target && second < Math.min(target + 10, 60)
+    );
+    if (targetSecond === undefined) return;
+
     const key = [
       now.getFullYear(),
       now.getMonth(),
       now.getDate(),
       now.getHours(),
-      minute
+      minute,
+      targetSecond
     ].join(":");
 
     if (key === lastMaintenanceKey) return;
+
     lastMaintenanceKey = key;
+    try {
+      await chrome.storage.local.set({ [MAINTENANCE_LAST_KEY]: key });
+    } catch (_err) {
+      // The in-memory key still prevents repeats within the current page session.
+    }
     playSound("maintenance");
   }
 
@@ -240,8 +263,10 @@
   const pageObserver = new MutationObserver(attachAll);
   pageObserver.observe(document.documentElement, { childList: true, subtree: true });
 
-  chrome.storage.local.get(DEFAULTS, stored => {
-    settings = { ...DEFAULTS, ...stored };
+  chrome.storage.local.get({ ...DEFAULTS, [MAINTENANCE_LAST_KEY]: "" }, stored => {
+    const { [MAINTENANCE_LAST_KEY]: storedMaintenanceKey, ...storedSettings } = stored;
+    settings = { ...DEFAULTS, ...storedSettings };
+    lastMaintenanceKey = storedMaintenanceKey || null;
     attachAll();
     checkMaintenanceTime();
   });
@@ -251,6 +276,10 @@
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
     for (const [key, change] of Object.entries(changes)) {
+      if (key === MAINTENANCE_LAST_KEY) {
+        lastMaintenanceKey = change.newValue || null;
+        continue;
+      }
       settings[key] = change.newValue;
     }
   });
