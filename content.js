@@ -8,6 +8,7 @@
     nightSeconds: "",
     timerVolume: 70,
     maintenanceEnabled: false,
+    maintenancePreAlertEnabled: false,
     maintenanceCount: 1,
     maintenanceVolume: 70,
     keywordEnabled: false,
@@ -74,9 +75,7 @@
   let audioContext = null;
 
   function getAudioContext() {
-    if (!audioContext) {
-      audioContext = new AudioContext();
-    }
+    if (!audioContext) audioContext = new AudioContext();
     if (audioContext.state === "suspended") {
       audioContext.resume().catch(() => {});
     }
@@ -150,9 +149,7 @@
         ? parseSeconds(settings.voteSeconds)
         : parseSeconds(settings.nightSeconds);
 
-    if (targets.has(state.sec)) {
-      playSound("timer");
-    }
+    if (targets.has(state.sec)) playSound("timer");
   }
 
   function attachTimer() {
@@ -164,7 +161,6 @@
     lastTimerKey = null;
     timerObserver = new MutationObserver(handleTimer);
     timerObserver.observe(el, { childList: true, characterData: true, subtree: true });
-
     handleTimer();
   }
 
@@ -210,12 +206,21 @@
 
     const now = new Date();
     const minute = now.getMinutes();
-    if (minute % 10 !== 9) return;
-
+    const minuteDigit = minute % 10;
     const second = now.getSeconds();
-    const targetSecond = getMaintenanceTargets().find(
-      target => second >= target && second < Math.min(target + 10, 60)
-    );
+
+    let targetSecond;
+
+    if (minuteDigit === 8 && settings.maintenancePreAlertEnabled) {
+      if (second >= 0 && second < 10) targetSecond = 0;
+    } else if (minuteDigit === 9) {
+      targetSecond = getMaintenanceTargets().find(
+        target => second >= target && second < Math.min(target + 10, 60)
+      );
+    } else {
+      return;
+    }
+
     if (targetSecond === undefined) return;
 
     const key = [
