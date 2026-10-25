@@ -7,6 +7,7 @@ const DEFAULTS = {
   nightSeconds: "",
   timerVolume: 70,
   maintenanceEnabled: false,
+  maintenancePreAlertEnabled: false,
   maintenanceCount: 1,
   maintenanceVolume: 70,
   keywordEnabled: false,
