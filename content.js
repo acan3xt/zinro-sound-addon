@@ -8,8 +8,8 @@
     nightSeconds: "",
     timerVolume: 70,
     maintenanceEnabled: false,
-    maintenancePreAlertEnabled: false,
-    maintenanceCount: 1,
+    maintenance8Count: 0,
+    maintenance9Count: 1,
     maintenanceVolume: 70,
     keywordEnabled: false,
     keywords: "",
@@ -20,6 +20,7 @@
   };
 
   const MAINTENANCE_LAST_KEY = "maintenanceLastNotificationKey";
+  const VALID_MAINTENANCE_COUNTS = [1, 2, 3, 4, 6];
 
   let settings = { ...DEFAULTS };
   let lastTimerKey = null;
@@ -53,6 +54,12 @@
   function normalize(value) {
     const text = String(value ?? "");
     return settings.caseInsensitive ? text.toLocaleLowerCase("ja-JP") : text;
+  }
+
+  function normalizeMaintenanceCount(value, allowZero = false) {
+    const count = Number(value);
+    if (allowZero && count === 0) return 0;
+    return VALID_MAINTENANCE_COUNTS.includes(count) ? count : 1;
   }
 
   function detectSelfName() {
@@ -194,9 +201,7 @@
     if (hit) playSound("keyword");
   }
 
-  function getMaintenanceTargets() {
-    const requested = Number(settings.maintenanceCount);
-    const count = [1, 2, 3, 4, 6].includes(requested) ? requested : 1;
+  function getMaintenanceTargets(count) {
     const interval = 60 / count;
     return Array.from({ length: count }, (_unused, index) => index * interval);
   }
@@ -209,18 +214,19 @@
     const minuteDigit = minute % 10;
     const second = now.getSeconds();
 
-    let targetSecond;
-
-    if (minuteDigit === 8 && settings.maintenancePreAlertEnabled) {
-      if (second >= 0 && second < 10) targetSecond = 0;
+    let count;
+    if (minuteDigit === 8) {
+      count = normalizeMaintenanceCount(settings.maintenance8Count, true);
+      if (count === 0) return;
     } else if (minuteDigit === 9) {
-      targetSecond = getMaintenanceTargets().find(
-        target => second >= target && second < Math.min(target + 10, 60)
-      );
+      count = normalizeMaintenanceCount(settings.maintenance9Count);
     } else {
       return;
     }
 
+    const targetSecond = getMaintenanceTargets(count).find(
+      target => second >= target && second < Math.min(target + 10, 60)
+    );
     if (targetSecond === undefined) return;
 
     const key = [
@@ -268,10 +274,27 @@
   const pageObserver = new MutationObserver(attachAll);
   pageObserver.observe(document.documentElement, { childList: true, subtree: true });
 
-  chrome.storage.local.get({ ...DEFAULTS, [MAINTENANCE_LAST_KEY]: "" }, stored => {
-    const { [MAINTENANCE_LAST_KEY]: storedMaintenanceKey, ...storedSettings } = stored;
-    settings = { ...DEFAULTS, ...storedSettings };
-    lastMaintenanceKey = storedMaintenanceKey || null;
+  chrome.storage.local.get(null, stored => {
+    const migration = {};
+
+    if (!Object.prototype.hasOwnProperty.call(stored, "maintenance8Count")
+        && Object.prototype.hasOwnProperty.call(stored, "maintenancePreAlertEnabled")) {
+      migration.maintenance8Count = stored.maintenancePreAlertEnabled ? 1 : 0;
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(stored, "maintenance9Count")
+        && Object.prototype.hasOwnProperty.call(stored, "maintenanceCount")) {
+      migration.maintenance9Count = normalizeMaintenanceCount(stored.maintenanceCount);
+    }
+
+    const resolved = { ...DEFAULTS, ...stored, ...migration };
+    settings = resolved;
+    lastMaintenanceKey = stored[MAINTENANCE_LAST_KEY] || null;
+
+    if (Object.keys(migration).length > 0) {
+      chrome.storage.local.set(migration).catch(() => {});
+    }
+
     attachAll();
     checkMaintenanceTime();
   });
