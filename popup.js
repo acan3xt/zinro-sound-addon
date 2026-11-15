@@ -7,8 +7,8 @@ const DEFAULTS = {
   nightSeconds: "",
   timerVolume: 70,
   maintenanceEnabled: false,
-  maintenancePreAlertEnabled: false,
-  maintenanceCount: 1,
+  maintenance8Count: 0,
+  maintenance9Count: 1,
   maintenanceVolume: 70,
   keywordEnabled: false,
   keywords: "",
@@ -18,6 +18,7 @@ const DEFAULTS = {
   caseInsensitive: true
 };
 
+const VALID_MAINTENANCE_COUNTS = [1, 2, 3, 4, 6];
 const ids = Object.keys(DEFAULTS);
 const elements = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
 const status = document.getElementById("status");
@@ -25,10 +26,17 @@ const timerVolumeValue = document.getElementById("timerVolumeValue");
 const keywordVolumeValue = document.getElementById("keywordVolumeValue");
 const maintenanceVolumeValue = document.getElementById("maintenanceVolumeValue");
 
+function normalizeMaintenanceCount(value) {
+  const count = Number(value);
+  return VALID_MAINTENANCE_COUNTS.includes(count) ? count : 1;
+}
+
 function readValue(id) {
   const el = elements[id];
   if (el.type === "checkbox") return el.checked;
-  if (el.type === "range" || id === "maintenanceCount") return Number(el.value);
+  if (el.type === "range" || id === "maintenance8Count" || id === "maintenance9Count") {
+    return Number(el.value);
+  }
   return el.value;
 }
 
@@ -50,10 +58,28 @@ async function save(id) {
   flash("保存しました");
 }
 
-chrome.storage.local.get(DEFAULTS, stored => {
+chrome.storage.local.get(null, stored => {
+  const migration = {};
+
+  if (!Object.prototype.hasOwnProperty.call(stored, "maintenance8Count")
+      && Object.prototype.hasOwnProperty.call(stored, "maintenancePreAlertEnabled")) {
+    migration.maintenance8Count = stored.maintenancePreAlertEnabled ? 1 : 0;
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(stored, "maintenance9Count")
+      && Object.prototype.hasOwnProperty.call(stored, "maintenanceCount")) {
+    migration.maintenance9Count = normalizeMaintenanceCount(stored.maintenanceCount);
+  }
+
+  const resolved = { ...DEFAULTS, ...stored, ...migration };
+
+  if (Object.keys(migration).length > 0) {
+    chrome.storage.local.set(migration).catch(() => {});
+  }
+
   for (const id of ids) {
     const el = elements[id];
-    const value = stored[id];
+    const value = resolved[id];
     if (el.type === "checkbox") el.checked = Boolean(value);
     else el.value = value;
     el.addEventListener(el.type === "range" ? "input" : "change", () => save(id));
