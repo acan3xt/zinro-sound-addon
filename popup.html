@@ -70,15 +70,21 @@
         <input id="maintenanceEnabled" type="checkbox">
       </label>
 
-      <p class="section-note">9分台（:09 / :19 / :29 / :39 / :49 / :59）は設定した回数だけ等間隔で鳴らします。必要なら、その1分前の8分台に予告を1回追加できます。同じ通知タイミングはリロードしても重複しません。</p>
+      <p class="section-note">8分台（:08 / :18 / :28 / :38 / :48 / :58）と9分台（:09 / :19 / :29 / :39 / :49 / :59）の通知回数を個別に設定できます。各1分間に設定回数だけ等間隔で鳴らします。同じ通知タイミングはリロードしても重複しません。</p>
 
-      <label class="check-row">
-        <input id="maintenancePreAlertEnabled" type="checkbox">
-        <span>8分台に予告通知を1回鳴らす</span>
+      <label>8分台の通知回数
+        <select id="maintenance8Count">
+          <option value="0">通知なし</option>
+          <option value="1">1回</option>
+          <option value="2">2回</option>
+          <option value="3">3回</option>
+          <option value="4">4回</option>
+          <option value="6">6回</option>
+        </select>
       </label>
 
       <label>9分台の通知回数
-        <select id="maintenanceCount">
+        <select id="maintenance9Count">
           <option value="1">1回</option>
           <option value="2">2回</option>
           <option value="3">3回</option>
